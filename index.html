@@ -2,6 +2,11 @@
 <html>
   <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta name="description" content="The Daily Planet">
+    <meta name="keywords" content="Daily Planet, Global news ">
+    <meta name="author" content="Avery Gray, Namank Shah, Nilesh Khaitan">
+    <meta charset="UTF-8">
+    <title>The Daily Planet: Your Newspaper on the Globe</title>
     <style type="text/css">
       html { height: 100% }
       body { height: 100%; margin: 0; padding: 0 }
@@ -14,6 +19,12 @@
         font-size: 15px;
         font-weight: 300;
         text-overflow: ellipsis;
+      }
+      .ui-widget-content a:link {
+        color:blue;
+      }
+      .ui-widget-content a:visited {
+        color:purple;
       }
         .controls {
         margin-top: 27px;
@@ -38,9 +49,11 @@
       }
     
       li{
-        padding:20px 10px 0px 25px;
+        padding:10px 20px;
       }
-
+      
+      #accordion .ui-accordion-content { padding: 0; }
+      
 
     </style>
     <link href="css/smoothness/jquery-ui-1.10.4.custom.css" rel="stylesheet">
@@ -68,7 +81,7 @@
         noDefault();
     }
     var map;
-    var found = false;
+    
     
     var ids = {
         'money': 1017,
@@ -129,11 +142,14 @@
         });
 
     };
+    var countries = [];
+    var counts = [];
+    var index = 0;
     // alert country based on latlong
     function getCountry(bounds) {
-        var countries = [];
-        var counts = [];
-        var index = 0;
+        countries = [];
+        counts = [];
+        index = 0;
         var geocoder = new google.maps.Geocoder();
         var NE = bounds.getNorthEast();
         var SW = bounds.getSouthWest();
@@ -156,7 +172,6 @@
                 //console.log("Event");
                 if (status == google.maps.GeocoderStatus.OK) {
                     if (results[1]) {
-                        found = true;
                         index = countries.indexOf((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
                         if (index == -1) {
                             countries.push((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
@@ -187,20 +202,13 @@
                     }
                 }
             });
-            //alert("found: " + found);
         }
-        window.setTimeout(function () {
-            //console.log("found: " + found);
-            if (!found) {
-                displayNews(countries, counts);
-            } else {
-                displayNews(countries, counts);
-            }
+        window.setTimeout(function () {            
+            displayNews();            
         }, 500);
     }
 
-    function displayNews(countries, counts) {
-        $("#news").empty();
+    function displayNews() {        
         $("#accordion").empty();
         for (var c = 0; c < countries.length; c++) {
             console.log(countries[c] + ", " + counts[c]);
@@ -210,14 +218,13 @@
             console.log("World, " + 10);
             updateStories('World', 10);
         }
-        
     }                
 
     // google.maps.event.addDomListener(window, 'load', initialize);
     function updateStories(place, numResults) {
         // given a place, display (up to) 10 NPR stories with it          
         var news = "";
-        news = "<h3>" + place + "</h3><div><ul>";
+        news = "<h3>" + place + "</h3><div><ul style='list-style:none; padding:0'>";
         $.ajax({
             url: "http://api.npr.org/query?apiKey=MDEzMTU2NjM5MDEzOTE4MzE1MjA5YjY1YQ001&searchType=mainText&output=JSON&searchTerm=" + place + "&numResults=" + numResults+"&id="+idSel,
             dataType: 'jsonp',
@@ -248,7 +255,8 @@
         $(":button").css('border-color', 'black');
         idSel = ids[$(this).attr("value")];            
         $(this).css('border-color', 'red');
-        getCountry(map.getBounds());
+        // getCountry(map.getBounds());
+        displayNews();
       });
       $("#accordion").accordion({
         heightStyle: "content"
@@ -261,9 +269,9 @@
       <body style = "font-family:Lato;">
           <div style="float:left; width:30%; overflow-y:scroll; height:100%">
               <div id = "main" style = "background-image:url('images/lightbackground'); background-repeat:repeat;padding:20px;border-bottom:2px solid;text-align:center">
-                  <img src = "images/logo.png" alt = "Logo" style="width: 120px; margin-bottom: -25px;" />
+                  <img src = "images/logo.png" alt = "Source:http://www.cunard.com" style="width: 120px; margin-bottom: -25px;" />
                   <h1 style = "text-align:center;">THE DAILY PLANET</h1>
-                  <h4 style = "text-align:center;margin-top:-20px;font-weight:300">Your newspaper on the globe</h4>
+                  <h4 style = "text-align:center;margin-top:-20px;font-weight:300">Your Newspaper on the Globe</h4>
                   <br>
                   <div id="newsmenu" style = "text-align:center;display:inline-box;">
                       <button id="news2" style="border: 2px red solid" class="btn1" value="news2">Top News</button>
@@ -273,7 +281,7 @@
                       <button id="sports" style="border: 2px black solid" class="btn1" value="sports">Sports</button>
                   </div>
               </div>
-              <div id ="news" style="padding:30px 0px;">
+              <div id ="news" style="padding:10px 0px;">
               </div>
               <div id="accordion">                
              </div>              
