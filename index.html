@@ -153,54 +153,57 @@
     var countries = [];
     var counts = [];
     var index = 0;
+    var counter = 0;
+    var NW, SW, NE;
+    var unitLng, unitLat;
+    var geocoder;
+    var points = [
+        [1, -1],
+        [3, -1],
+        [2, -2],
+        [1, -3],
+        [3, -3]
+    ];
+    var latlong;
+    var i;
+    var worker;
     // alert country based on latlong
     function getCountry(bounds) {
         countries = [];
         counts = [];
         index = 0;
-        var geocoder = new google.maps.Geocoder();
-        var NE = bounds.getNorthEast();
-        var SW = bounds.getSouthWest();
-        var unitLat = Math.abs((SW.lat() - NE.lat()) / 4.0);
-        var unitLng = Math.abs((SW.lng() - NE.lng()) / 4.0);
-        var NW = new google.maps.LatLng(NE.lat(), SW.lng());
-        var points = [
-            [1, -1],
-            [3, -1],
-            [2, -2],
-            [1, -3],
-            [3, -3]
-        ];
-        var latlong;
-        for (var i = 0; i < points.length; i++) {
-            latlong = new google.maps.LatLng(NW.lat() + points[i][1] * unitLat, NW.lng() + points[i][0] * unitLng);
-            geocoder.geocode({
-                'location': latlong
-            }, function (results, status) {
-                //console.log("Event");
-                if (status == google.maps.GeocoderStatus.OK) {
-                    if (results[1]) {
-                        index = countries.indexOf((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
-                        if (index == -1) {
-                            countries.push((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
-                            counts.push(1);
-                            //console.log("Country: " + countries[countries.length-1]);
-                        } else {
-                            counts[index]++;
-                        }
-                        //updateStories((results[1].formatted_address).match(/[\w\s]+$/)[0]);
-                        //throw new Error(latlong.lat() + ', ' + latlong.lng() + ', ' + results[1].formatted_address);
+        geocoder = new google.maps.Geocoder();
+        NE = bounds.getNorthEast();
+        SW = bounds.getSouthWest();
+        unitLat = Math.abs((SW.lat() - NE.lat()) / 4.0);
+        unitLng = Math.abs((SW.lng() - NE.lng()) / 4.0);
+        NW = new google.maps.LatLng(NE.lat(), SW.lng());
+        counter = 0;
+        worker = window.setInterval(mrante, 250);
+    }
+    
+     function mrante() {
+        i = counter;
+        latlong = new google.maps.LatLng(NW.lat() + points[i][1] * unitLat, NW.lng() + points[i][0] * unitLng);
+        console.log(latlong);
+        geocoder.geocode({
+            'location': latlong
+        }, function (results, status) {
+            
+            if (status == google.maps.GeocoderStatus.OK) {
+                if (results[1]) {
+                    console.log("Got address: "+results[1].formatted_address);
+                    index = countries.indexOf((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
+                    if (index == -1) {
+                        countries.push((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
+                        counts.push(1);
+                        console.log("Country: " + countries[countries.length-1]);
                     } else {
-                        //alert('No result');
-                        index = countries.indexOf('World');
-                        if (index == -1) {
-                            countries.push('World');
-                            counts.push(1);
-                        } else {
-                            counts[index]++;
-                        }
-                    }
+                        counts[index]++;
+                    }                    
                 } else {
+                    console.log("No result");
+                    
                     index = countries.indexOf('World');
                     if (index == -1) {
                         countries.push('World');
@@ -209,11 +212,25 @@
                         counts[index]++;
                     }
                 }
-            });
+            } else {
+                console.log("Geo error with status:" + status);
+                index = countries.indexOf('World');
+                if (index == -1) {
+                    countries.push('World');
+                    counts.push(1);
+                } else {
+                    counts[index]++;
+                }
+            }
+        });
+        counter++;
+        if (counter >= points.length) {
+            counter = 0;
+            i = 0;
+            window.clearInterval(worker);
+            console.log("Function mrante stopped");
+            displayNews();
         }
-        window.setTimeout(function () {            
-            displayNews();            
-        }, 500);
     }
 
     function displayNews() {        
