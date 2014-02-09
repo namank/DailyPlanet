@@ -36,9 +36,27 @@
       .pac-container {
         font-family: Roboto;
       }
+    
+      li{
+        padding:20px 10px 0px 25px;
+      }
 
 
     </style>
+    <!-- Google Fonts embed code -->
+    <script type="text/javascript">
+        (function() {
+         var link_element = document.createElement("link"),
+         s = document.getElementsByTagName("script")[0];
+         if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+         link_element.href = "http:";
+         }
+         link_element.href += "//fonts.googleapis.com/css?family=Lato:100italic,100,300italic,300,400italic,400,700italic,700,900italic,900";
+         link_element.rel = "stylesheet";
+         link_element.type = "text/css";
+         s.parentNode.insertBefore(link_element, s);
+         })();
+        </script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"> </script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBspUEDd0uX8Il_1rp3Jri5bju2THqfezE&sensor=false&libraries=places"></script>
     <script type="text/javascript">
@@ -213,10 +231,23 @@
     
   </head>
   <body>
-    <div style="float:left; width:30%; overflow-y:scroll; height:100%">
-    <ul id ="news">
-    </ul>
-    </div>
+      <body style = "font-family:Lato;">
+          <div style="float:left; width:30%; overflow-y:scroll; height:100%">
+              <div id = "main" style = "background-image:url('file:///Users/nileshkhaitan/Desktop/Hackathon/HackBeanPot/lightbackground'); background-repeat:repeat;padding:20px;border-bottom:2px solid">
+                  <h1 style = "text-align:center;">THE DAILY PLANET</h1>
+                  <h4 style = "text-align:center;margin-top:-20px;font-weight:300">Your newspaper on the globe</h4>
+                  <br>
+                  <div id="newsmenu" style = "text-align:center;display:inline-box;">
+                      <button class="btn1">Top News</button>
+                      <button class="btn1">Politics</button>
+                      <button class="btn1">Entertainment</button>
+                      <button class="btn1">Money</button>
+                      <button class="btn1">Sports</button>
+                  </div>
+              </div>
+              <ul id ="news" style="padding:30px 0px;">
+              </ul>
+          </div>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
     <div style="float:right; width:70%" id="map-canvas"/>
   </body>
