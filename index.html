@@ -43,6 +43,9 @@
 
 
     </style>
+    <link href="css/smoothness/jquery-ui-1.10.4.custom.css" rel="stylesheet">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"> </script>
+    <script src="js/jquery-ui-1.10.4.custom.js"></script>
     <!-- Google Fonts embed code -->
     <script type="text/javascript">
         (function() {
@@ -56,8 +59,7 @@
          link_element.type = "text/css";
          s.parentNode.insertBefore(link_element, s);
          })();
-        </script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"> </script>
+    </script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBspUEDd0uX8Il_1rp3Jri5bju2THqfezE&sensor=false&libraries=places"></script>
     <script type="text/javascript">
     if (navigator.geolocation) {
@@ -67,7 +69,15 @@
     }
     var map;
     var found = false;
-
+    
+    var ids = {
+        'money': 1017,
+        'technology':1019,
+        'sports':1055,
+        'news':1001,
+        'politics':1014
+    }
+    var idSel=ids['news'];
     function success(position) {
         var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         var mapOptions = {
@@ -94,7 +104,7 @@
             }
         });
     };
-
+    
     function noDefault(error) {
         var mapOptions = {
             center: new google.maps.LatLng(0, 0),
@@ -147,9 +157,9 @@
                 if (status == google.maps.GeocoderStatus.OK) {
                     if (results[1]) {
                         found = true;
-                        index = countries.indexOf((results[1].formatted_address).match(/[\w\s]+$/)[0]);
+                        index = countries.indexOf((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
                         if (index == -1) {
-                            countries.push((results[1].formatted_address).match(/[\w\s]+$/)[0]);
+                            countries.push((results[1].formatted_address).match(/[\w\s]+$/)[0].trim());
                             counts.push(1);
                             //console.log("Country: " + countries[countries.length-1]);
                         } else {
@@ -191,6 +201,7 @@
 
     function displayNews(countries, counts) {
         $("#news").empty();
+        $("#accordion").empty();
         for (var c = 0; c < countries.length; c++) {
             console.log(countries[c] + ", " + counts[c]);
             updateStories(countries[c], counts[c] * 2);
@@ -199,15 +210,16 @@
             console.log("World, " + 10);
             updateStories('World', 10);
         }
+        
     }                
 
     // google.maps.event.addDomListener(window, 'load', initialize);
     function updateStories(place, numResults) {
         // given a place, display (up to) 10 NPR stories with it          
         var news = "";
-        news = "<hr/>" + place + "<hr/>";
+        news = "<h3>" + place + "</h3><div><ul>";
         $.ajax({
-            url: "http://api.npr.org/query?apiKey=MDEzMTU2NjM5MDEzOTE4MzE1MjA5YjY1YQ001&searchType=mainText&output=JSON&searchTerm=" + place + "&numResults=" + numResults,
+            url: "http://api.npr.org/query?apiKey=MDEzMTU2NjM5MDEzOTE4MzE1MjA5YjY1YQ001&searchType=mainText&output=JSON&searchTerm=" + place + "&numResults=" + numResults+"&id="+idSel,
             dataType: 'jsonp',
             success: function (data) {
                 // do stuff with json (in this case an array)                 
@@ -220,13 +232,28 @@
                     }
                     news += ("<li><a href='" + url + "' target='_blank'>" + title + "</a><br/>" + miniTeaser + "</li>");
                 });
-                $("#news").append(news + "<br/>");
+                news +="</div>";
+                $("#accordion").append(news + "</ul>");
+                $("#accordion").accordion("refresh");
+                $("#accordion").accordion('option', 'select', 1);
             },
             error: function () {
                 alert("Could not contact NPR API");
             }
         });
     }
+    
+    $(document).ready(function(){      
+      $(":button").click(function() {
+        $(":button").css('border-color', 'black');
+        idSel = ids[$(this).attr("value")];            
+        $(this).css('border-color', 'red');
+        getCountry(map.getBounds());
+      });
+      $("#accordion").accordion({
+        heightStyle: "content"
+      });      
+    });
     </script>
     
   </head>
@@ -239,16 +266,19 @@
                   <h4 style = "text-align:center;margin-top:-20px;font-weight:300">Your newspaper on the globe</h4>
                   <br>
                   <div id="newsmenu" style = "text-align:center;display:inline-box;">
-                      <button class="btn1">Top News</button>
-                      <button class="btn1">Politics</button>
-                      <button class="btn1">Entertainment</button>
-                      <button class="btn1">Money</button>
-                      <button class="btn1">Sports</button>
+                      <button id="news2" style="border: 2px red solid" class="btn1" value="news2">Top News</button>
+                      <button id="politics"  style="border: 2px black solid" class="btn1" value="politics">Politics</button>
+                      <button id="technology" style="border: 2px black solid" class="btn1" value="technology">Technology</button>
+                      <button id="money" style="border: 2px black solid" class="btn1" value="money">Money</button>
+                      <button id="sports" style="border: 2px black solid" class="btn1" value="sports">Sports</button>
                   </div>
               </div>
-              <ul id ="news" style="padding:30px 0px;">
-              </ul>
-          </div>
+              <div id ="news" style="padding:30px 0px;">
+              </div>
+              <div id="accordion">                
+             </div>              
+          
+         </div>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
     <div style="float:right; width:70%" id="map-canvas"/>
   </body>
