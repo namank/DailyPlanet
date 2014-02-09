@@ -83,14 +83,20 @@
         noDefault();
     }
     var map;
-    
+    var select = {
+		'money': 0,
+        'technology':0,
+        'sports':0,
+        'news2':1,
+        'politics':0
+	}
     
     var ids = {
-        'money': 1017,
-        'technology':1019,
-        'sports':1055,
-        'news':1001,
-        'politics':1014
+        'money': '1017',
+        'technology':'1019',
+        'sports':'1055',
+        'news2':'1001',
+        'politics':'1014'
     }
     var idSel=ids['news'];
     function success(position) {
@@ -213,11 +219,11 @@
     function displayNews() {        
         $("#accordion").empty();
         for (var c = 0; c < countries.length; c++) {
-            console.log(countries[c] + ", " + counts[c]);
+            //console.log(countries[c] + ", " + counts[c]);
             updateStories(countries[c], counts[c] * 2);
         }
         if (countries.length == 0) {
-            console.log("World, " + 10);
+            //console.log("World, " + 10);
             updateStories('World', 10);
         }
     }                
@@ -227,11 +233,15 @@
         // given a place, display (up to) 10 NPR stories with it          
         var news = "";
         news = "<h3>" + place + "</h3><div><ul style='list-style:none; padding:0'>";
+		console.log(idSel);
         $.ajax({
-            url: "http://api.npr.org/query?apiKey=MDEzMTU2NjM5MDEzOTE4MzE1MjA5YjY1YQ001&searchType=mainText&output=JSON&searchTerm=" + place + "&numResults=" + numResults+"&id="+idSel,
+            url: "http://api.npr.org/query?apiKey=MDEzMTU2NjM5MDEzOTE4MzE1MjA5YjY1YQ001&searchType=mainText&action=Or&output=JSON&searchTerm=" + place + "&numResults=" + numResults+"&id="+idSel,
             dataType: 'jsonp',
             success: function (data) {
-                // do stuff with json (in this case an array)                 
+                // do stuff with json (in this case an array)
+				console.log(data);    
+				// TODO - error checking here  
+				if (data['list']['story']) {        
                 $.each(data['list']['story'], function (i, item) {
                     title = item['title']['$text']; // get the text
                     url = item['link'][0]['$text'];
@@ -241,6 +251,9 @@
                     }
                     news += ("<li><a href='" + url + "' target='_blank'>" + title + "</a><br/>" + miniTeaser + "</li>");
                 });
+                } else {
+                	news += "</ul>No news articles matched query. Please try broadening it."
+                }
                 news +="</div>";
                 $("#accordion").append(news + "</ul>");
                 $("#accordion").accordion("refresh");
@@ -254,9 +267,20 @@
     
     $(document).ready(function(){      
       $(":button").click(function() {
+       
         $(":button").css('border-color', 'black');
-        idSel = ids[$(this).attr("value")];            
-        $(this).css('border-color', 'red');
+        
+		select[$(this).attr("value")] = select[$(this).attr("value")] == "1" ? "0":"1";
+		//select[$(this).attr("value")] = 1 - parseInt(select[$(this).attr("value")]);
+		idSel = "";
+		for(var key in select) {
+			if (select[key] == '1') {
+				idSel += ids[key] + ",";
+				$("#"+key).css('border-color', 'red');
+			}
+		}
+		console.log(idSel);
+        
         // getCountry(map.getBounds());
         displayNews();
       });
